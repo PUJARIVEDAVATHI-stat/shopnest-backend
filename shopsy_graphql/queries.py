@@ -1,0 +1,153 @@
+import strawberry
+
+from shopsy_graphql.types import CategoryType, ProductType
+from services.product_service import get_categories, get_products, get_product_by_id,get_products_by_category, get_products_by_subcategory,search_products,get_products_sorted
+from shopsy_graphql.types import (
+    CategoryType,
+    ProductType,
+    ProductSort
+)
+
+
+
+@strawberry.type
+class Query:
+
+    @strawberry.field
+    def categories(self) -> list[CategoryType]:
+
+        result = get_categories()
+
+        if not result["succeed"]:
+            return []
+
+        return [
+            CategoryType(
+                category_id=row[0],
+                category_name=row[1],
+                description=row[2]
+            )
+            for row in result["data"]
+        ]
+
+    @strawberry.field
+    def products(self) -> list[ProductType]:
+
+        result = get_products()
+
+        if not result["succeed"]:
+            return []
+
+        return [
+            ProductType(
+                product_id=row[0],
+                product_name=row[1],
+                brand=row[2],
+                price=row[3],
+                stock_quantity=row[4]
+            )
+            for row in result["data"]
+        ]
+   
+    @strawberry.field
+    def product(self, product_id: int) -> ProductType | None:
+
+        result = get_product_by_id(product_id)
+
+        if not result["succeed"]:
+            return None
+
+        if result["data"] is None:
+            return None
+
+        row = result["data"]
+
+        return ProductType(
+            product_id=row[0],
+            product_name=row[1],
+            brand=row[2],
+            price=row[3],
+            stock_quantity=row[4]
+        )    
+   
+    @strawberry.field
+    def products_by_category(self, category_id: int) -> list[ProductType]:
+
+        result = get_products_by_category(category_id)
+
+        if not result["succeed"]:
+            return []
+
+        return [
+            ProductType(
+                product_id=row[0],
+                product_name=row[1],
+                brand=row[2],
+                price=row[3],
+                stock_quantity=row[4]
+            )
+            for row in result["data"]
+        ]     
+    @strawberry.field
+    def products_by_subcategory(
+        self,
+        subcategory_id: int
+    ) -> list[ProductType]:
+
+        result = get_products_by_subcategory(subcategory_id)
+
+        if not result["succeed"]:
+            return []
+
+        return [
+            ProductType(
+                product_id=row[0],
+                product_name=row[1],
+                brand=row[2],
+                price=row[3],
+                stock_quantity=row[4]
+            )
+            for row in result["data"]
+        ]       
+    @strawberry.field
+    def search_products(
+        self,
+        keyword: str
+    ) -> list[ProductType]:
+
+        result = search_products(keyword)
+
+        if not result["succeed"]:
+            return []
+
+        return [
+            ProductType(
+                product_id=row[0],
+                product_name=row[1],
+                brand=row[2],
+                price=row[3],
+                stock_quantity=row[4]
+            )
+            for row in result["data"]
+        ]        
+    @strawberry.field
+    def products_sorted(
+        self,
+        sort_by: ProductSort
+    ) -> list[ProductType]:
+
+        result = get_products_sorted(sort_by.value)
+
+        if not result["succeed"]:
+            return []
+
+        return [
+            ProductType(
+                product_id=row[0],
+                product_name=row[1],
+                brand=row[2],
+                price=row[3],
+                stock_quantity=row[4]
+            )
+            for row in result["data"]
+        ]        
