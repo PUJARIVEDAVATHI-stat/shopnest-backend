@@ -1,11 +1,22 @@
 import strawberry
 
-from shopsy_graphql.types import CategoryType, ProductType
-from services.product_service import get_categories, get_products, get_product_by_id,get_products_by_category, get_products_by_subcategory,search_products,get_products_sorted
+from services.product_service import (
+    get_categories,
+    get_products,
+    get_product_by_id,
+    get_products_by_category,
+    get_products_by_subcategory,
+    search_products,
+    get_products_sorted,
+    get_product_listing
+)
+
 from shopsy_graphql.types import (
     CategoryType,
     ProductType,
-    ProductSort
+    ProductSort,
+    ProductSortField,
+    SortOrder
 )
 
 
@@ -31,9 +42,26 @@ class Query:
         ]
 
     @strawberry.field
-    def products(self) -> list[ProductType]:
+    def products(
+        self,
+        search: str | None = None,
+        category_id: int | None = None,
+        subcategory_id: int | None = None,
+        sort_by: ProductSortField | None = None,
+        sort_order: SortOrder = SortOrder.ASC,
+        page: int = 1,
+        page_size: int = 10
+    ) -> list[ProductType]:
 
-        result = get_products()
+        result = get_product_listing(
+            search,
+            category_id,
+            subcategory_id,
+            sort_by.value if sort_by else None,
+            sort_order.value,
+            page,
+            page_size
+        )
 
         if not result["succeed"]:
             return []

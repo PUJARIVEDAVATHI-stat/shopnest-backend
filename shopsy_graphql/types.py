@@ -22,4 +22,15 @@ class ProductSort(enum.Enum):
     PRICE_ASC = "PRICE_ASC"
     PRICE_DESC = "PRICE_DESC"
     NAME_ASC = "NAME_ASC"
-    NAME_DESC = "NAME_DESC"    
+    NAME_DESC = "NAME_DESC"
+
+@strawberry.enum
+class ProductSortField(enum.Enum):
+    PRICE = "price"
+    NAME = "name"
+
+
+@strawberry.enum
+class SortOrder(enum.Enum):
+    ASC = "asc"
+    DESC = "desc"        
