@@ -1,3 +1,6 @@
+import logging
+from database.db import get_connection
+logger = logging.getLogger(__name__)
 def get_categories():
     """
     Fetch all active categories.
@@ -269,6 +272,18 @@ def get_product_listing(
     page_size
 ):
     try:
+        logger.info(
+            "Fetching product listing: search=%s, category_id=%s, "
+            "subcategory_id=%s, sort_by=%s, sort_order=%s, "
+            "page=%s, page_size=%s",
+            search,
+            category_id,
+            subcategory_id,
+            sort_by,
+            sort_order,
+            page,
+            page_size
+        )
         conn = get_connection()
         cursor = conn.cursor()
 
@@ -313,17 +328,15 @@ def get_product_listing(
             params.append(subcategory_id)
 
         # Sorting
+        direction = "DESC" if sort_order.lower() == "desc" else "ASC"
+
         if sort_by:
-
             if sort_by.lower() == "price":
-                query += f" ORDER BY p.price {sort_order.upper()}"
-
+                query += f" ORDER BY p.price {direction}"
             elif sort_by.lower() == "name":
-                query += f" ORDER BY p.product_name {sort_order.upper()}"
-
+                query += f" ORDER BY p.product_name {direction}"
             else:
                 query += " ORDER BY p.product_id"
-
         else:
             query += " ORDER BY p.product_id"
 
@@ -343,7 +356,7 @@ def get_product_listing(
         cursor.execute(query, tuple(params))
 
         data = cursor.fetchall()
-
+        logger.info("Product listing fetched successfully: count=%s", len(data))
         cursor.close()
         conn.close()
 
@@ -352,9 +365,10 @@ def get_product_listing(
             "data": data
         }
 
-    except Exception as e:
+    except Exception:
+        logger.exception("Failed to fetch product listing")
 
         return {
             "succeed": False,
-            "message": str(e)
+            "message": "Unable to fetch products at this time."
         }

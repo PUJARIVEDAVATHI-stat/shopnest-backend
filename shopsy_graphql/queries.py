@@ -53,6 +53,30 @@ class Query:
         page_size: int = 10
     ) -> list[ProductType]:
 
+        if page < 1:
+            raise ValueError("Page must be greater than or equal to 1")
+
+        if page_size < 1:
+            raise ValueError("Page size must be greater than or equal to 1")
+
+        if page_size > 100:
+            raise ValueError("Page size cannot exceed 100")
+        
+        if search is not None:
+            search = search.strip()
+
+            if not search:
+                raise ValueError("Search cannot be empty")
+
+            if len(search) > 100:
+                raise ValueError("Search cannot exceed 100 characters")
+
+        if category_id is not None and category_id < 1:
+            raise ValueError("Category ID must be greater than or equal to 1")
+
+        if subcategory_id is not None and subcategory_id < 1:
+            raise ValueError("Subcategory ID must be greater than or equal to 1")
+
         result = get_product_listing(
             search,
             category_id,
@@ -64,7 +88,7 @@ class Query:
         )
 
         if not result["succeed"]:
-            return []
+            raise Exception(result.get("message", "Unable to fetch products"))
 
         return [
             ProductType(
