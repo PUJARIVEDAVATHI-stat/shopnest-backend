@@ -65,3 +65,32 @@ Repository Layer
    │
    ▼
 PostgreSQL
+
+
+## Authentication
+
+ShopNest uses JWT-based authentication with bcrypt password hashing.
+
+### Authentication Flow
+
+```text
+Customer Registration
+        ↓
+Input Validation
+        ↓
+Password Hashing (bcrypt)
+        ↓
+PostgreSQL User
+        ↓
+Login
+        ↓
+Credential Verification
+        ↓
+JWT Access Token
+        ↓
+Authorization Header
+        ↓
+JWT Validation
+        ↓
+Authenticated GraphQL Request
+
