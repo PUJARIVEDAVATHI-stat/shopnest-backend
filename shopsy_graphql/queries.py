@@ -1,4 +1,7 @@
 import strawberry
+from strawberry.types import Info
+
+from auth.context import require_authenticated_user
 
 from services.product_service import (
     get_categories,
@@ -44,14 +47,17 @@ class Query:
     @strawberry.field
     def products(
         self,
+        info: Info,
         search: str | None = None,
         category_id: int | None = None,
         subcategory_id: int | None = None,
-        sort_by: ProductSortField | None = None,
-        sort_order: SortOrder = SortOrder.ASC,
+        sort_by: str = "product_id",
+        sort_order: str = "asc",
         page: int = 1,
         page_size: int = 10
     ) -> list[ProductType]:
+        
+        require_authenticated_user(info)
 
         if page < 1:
             raise ValueError("Page must be greater than or equal to 1")
@@ -81,8 +87,8 @@ class Query:
             search,
             category_id,
             subcategory_id,
-            sort_by.value if sort_by else None,
-            sort_order.value,
+            sort_by if sort_by else None,
+            sort_order,
             page,
             page_size
         )
@@ -99,10 +105,12 @@ class Query:
                 stock_quantity=row[4]
             )
             for row in result["data"]
-        ]
+]
    
     @strawberry.field
-    def product(self, product_id: int) -> ProductType | None:
+    def product(self, info: Info,product_id: int) -> ProductType | None:
+        
+        require_authenticated_user(info)
 
         result = get_product_by_id(product_id)
 
@@ -123,7 +131,8 @@ class Query:
         )    
    
     @strawberry.field
-    def products_by_category(self, category_id: int) -> list[ProductType]:
+    def products_by_category(self,info: Info, category_id: int) -> list[ProductType]:
+        require_authenticated_user(info)
 
         result = get_products_by_category(category_id)
 
@@ -143,8 +152,10 @@ class Query:
     @strawberry.field
     def products_by_subcategory(
         self,
+        info: Info,
         subcategory_id: int
     ) -> list[ProductType]:
+        require_authenticated_user(info)
 
         result = get_products_by_subcategory(subcategory_id)
 
@@ -164,8 +175,10 @@ class Query:
     @strawberry.field
     def search_products(
         self,
+        info: Info,
         keyword: str
     ) -> list[ProductType]:
+        require_authenticated_user(info)
 
         result = search_products(keyword)
 
@@ -185,8 +198,10 @@ class Query:
     @strawberry.field
     def products_sorted(
         self,
+        info: Info,
         sort_by: ProductSort
     ) -> list[ProductType]:
+        require_authenticated_user(info)
 
         result = get_products_sorted(sort_by.value)
 
